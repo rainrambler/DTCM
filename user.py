@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import timeit
+import time
 
 from datetime import datetime, timedelta
 
@@ -14,6 +15,7 @@ from ruleset import Decision
 
 from fileoper import file_exists, write_text_file, get_signed_name, get_signed_vp
 from simplevdr import user_valid
+from transettings import create_setting
 
 
 class User:
@@ -243,10 +245,23 @@ def tranborder_usecase(trans_vc: str):
     it_person = Transferor()
     it_person.do_transfer(trans_vc_signed_vp)
 
+def create_demo_usecases():
+    demo1 = create_setting("user1", "user3", "user4", "privacy data", "person",
+                           "500,000", "France", "US", "Contractor mangement")
+    demo2 = create_setting("user1", "user3", "user4", "privacy data", "person",
+                           "500,000", "France", "US", "standard contractual clauses")
+
+    prov = Provider("user3.key")
+    prov.create_trans_request(demo1, "trans_eu_demo1.json")
+    prov.create_trans_request(demo2, "trans_eu_demo2.json")
 
 def main():
     """Entrance"""
-    tranborder_usecase("trans_eu_demo.json")
+    create_demo_usecases()
+
+    time.sleep(1) # File oper
+
+    tranborder_usecase("trans_eu_demo1.json")
     tranborder_usecase("trans_eu_demo2.json")
 
 
