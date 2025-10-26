@@ -58,9 +58,9 @@ For theoretical foundations, technical details, and experimental results, please
 "A Framework for Data Trans-Border Compliance Management Based on Customized Verifiable Credentials"
 Authors: Mudi Xu, Zhizhong Tan, Anyu Wang, Yan Liu, Weiping Deng, Xingxing Yang, Sai Zou, Wenyong Wang
 
-🤝 Contributing
+## 🤝 Contributing
 
-## As this is a research reference implementation, we welcome:
+As this is a research reference implementation, we welcome:
 
 - Bug reports and fixes
 
