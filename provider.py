@@ -1,12 +1,12 @@
 import asyncio
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 import didkit
 
 import fileoper
-import transettings
+from transettings import TranSettings, create_demo_setting, create_setting, random_region, random_datatype, random_reason
 
 from simplevdr import get_user_id
 
@@ -26,7 +26,7 @@ class Provider:
     ):
         """Pre-defined Verification Set"""
         # Five Allow VCs
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -38,7 +38,7 @@ class Provider:
             "business analysis",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "allw1.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -50,7 +50,7 @@ class Provider:
             "business analysis",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "allw2.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -62,7 +62,7 @@ class Provider:
             "BCRS ID: XXX",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "allw3.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -74,7 +74,7 @@ class Provider:
             "Has local storage on XXX",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "allw4.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -88,7 +88,7 @@ class Provider:
         self.fill_trans_req(settings, os.path.join(outpath, "allw5.json"))
 
         # Three Risk VCs
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -100,7 +100,7 @@ class Provider:
             "business analysis",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "rsk1.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -112,7 +112,7 @@ class Provider:
             "user consent",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "rsk2.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -126,7 +126,7 @@ class Provider:
         self.fill_trans_req(settings, os.path.join(outpath, "rsk3.json"))
 
         # Two Deny VCs
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -138,7 +138,7 @@ class Provider:
             "business analysis",
         )
         self.fill_trans_req(settings, os.path.join(outpath, "rj1.json"))
-        settings = transettings.create_setting(
+        settings = create_setting(
             sender,
             receiver,
             approver1,
@@ -155,40 +155,47 @@ class Provider:
         """Generate random VCs of specified number."""
         i = 0
         while i < number:
-            from_region = transettings.random_region()
-            to_region = transettings.random_region()
+            from_region = random_region()
+            to_region = random_region()
             while to_region == from_region:
-                to_region = transettings.random_region()
+                to_region = random_region()
 
-            settings = transettings.create_setting(
+            settings = create_setting(
                 "user3",
                 "user1",
                 "user4",
-                transettings.random_datatype(),
+                random_datatype(),
                 "MB",
                 "500",
                 from_region,
                 to_region,
-                transettings.random_reason(),
+                random_reason(),
             )
             self.fill_trans_req(
                 settings, os.path.join(opath, "rnd" + str(i + 10) + ".json")
             )
             i = i + 1
 
-    def create_trans_request(self, receiver: str, approver1: str, outfile: str):
+    def create_trans_request_demo(self, receiver: str, approver1: str, outfile: str):
         """create a transfer request json file. outfile: transfer json."""
 
         # sender: str, receiver: str, approver1: str
         send_did = get_user_id(receiver)
         receiver_did = self.did
         approv_did = get_user_id(approver1)
-        settings = transettings.create_demo_setting(send_did, receiver_did, approv_did)
+        settings = create_demo_setting(send_did, receiver_did, approv_did)
 
         self.fill_trans_req(settings, outfile)
         print(f"VC File {outfile} generated.")
 
-    def fill_trans_req(self, trans: transettings.TranSettings, outfile: str):
+    def create_trans_request(self, transets: TranSettings,
+                             outfile: str):
+        """create a transfer request json file. outfile: transfer json."""
+
+        self.fill_trans_req(transets, outfile)
+        print(f"VC File {outfile} generated.")
+
+    def fill_trans_req(self, trans: TranSettings, outfile: str):
         """Fill a verification credential. outfile: transfer VC."""
 
         issuance_date = datetime.now().replace(microsecond=0)
