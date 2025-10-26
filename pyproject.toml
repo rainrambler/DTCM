@@ -1,0 +1,9 @@
+[project]
+name = "DTCM"
+version = "0.1.0"
+description = "Source code for paper DTCM-VC"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "didkit==0.3.3",
+]
