@@ -15,17 +15,23 @@ class Issuer:
             self.key = f.readline()
             f.close()
         self.did = didkit.key_to_did("key", self.key)
-        self.allusers = dict()
+        self.allusers = {}
 
     def create_users_batch(self, usernum: int):
+        REPEAT_LIMIT = 3
         for i in range(usernum):
-            keyx = didkit.generate_ed25519_key()
+            
             username = f"user{i}"
             fname = username + ".key"
             userjson = username + ".json"
-            fileoper.write_text_file(fname, keyx)
-            asyncio.run(self.sign_user(username, keyx, userjson))
-            time.sleep(2)
+            for j in range(REPEAT_LIMIT):
+                keyx = didkit.generate_ed25519_key()
+                if keyx:
+                    fileoper.write_text_file(fname, keyx)
+                    asyncio.run(self.sign_a_user(username, keyx, userjson))
+                    time.sleep(2)
+                    break
+                print(f"WARN: Create Key for User {i} Failed. Repeat {j} times.")
 
         print(f"{usernum} users created.")
 
@@ -76,5 +82,33 @@ class Issuer:
 
     def save_users(self, outfilename: str):
         """Convert and write JSON object to file"""
-        with open(outfilename, "w") as fobj:
+        with open(outfilename, "w", encoding="utf-8") as fobj:
             json.dump(self.allusers, fobj)
+
+def create_issuer(key_file: str) -> bool:
+    keyx = didkit.generate_ed25519_key()
+    if not keyx:
+        return False
+    fileoper.write_text_file(key_file, keyx)
+    return True
+
+def main():
+    issuer_file = "issuer.jwk"
+    res = create_issuer(issuer_file)
+    if not res:
+        print(f"WARN: Cannot create key file: {issuer_file} for Issuer!")
+        return
+
+    time.sleep(1)
+
+    if not fileoper.file_exists(issuer_file):
+        print(f"WARN: Cannot find key file: {issuer_file} for Issuer!")
+        return
+
+    issuer = Issuer(issuer_file)
+    issuer.create_users_batch(5)
+
+    issuer.save_users("allusers.json")
+
+if __name__ == "__main__":
+    main()
